@@ -14,20 +14,19 @@ const winningCombos = [
 ];
 
 export default function App() {
-  const [gameState, setGameState] = useState(true);
+  const [gameState, setGameState] = useState({
+    over: false,
+    tie: false,
+    won: false,
+  });
   const [player, setPlayer] = useState("X");
 
   function changePlayer() {
     player === "X" ? setPlayer("O") : setPlayer("X");
   }
 
-  function checkGameOver() {
+  function checkGame() {
     for (let i = 0; i < winningCombos.length; i++) {
-      console.log(
-        playerBoxes[`player${player}`].includes(winningCombos[i][0]),
-        playerBoxes[`player${player}`].includes(winningCombos[i][2]),
-        playerBoxes[`player${player}`].includes(winningCombos[i][1])
-      );
       if (
         playerBoxes[`player${player}`].includes(winningCombos[i][0]) &&
         playerBoxes[`player${player}`].includes(winningCombos[i][2]) &&
@@ -36,20 +35,25 @@ export default function App() {
         return true;
       }
     }
+    if (playerBoxes[`playerX`].length + playerBoxes[`playerO`].length === 9) {
+      setGameState({ over: true, tie: true, won: false });
+    }
   }
 
   function onClickHandler(e) {
     player === "X"
       ? playerBoxes.playerX.push(parseInt(e.target.id))
       : playerBoxes.playerO.push(parseInt(e.target.id));
-    checkGameOver() ? setGameState(false) : changePlayer();
+    checkGame()
+      ? setGameState({ over: true, tie: false, won: true })
+      : changePlayer();
   }
 
   function buttonOnClickHandler(e) {
     window.location.reload();
   }
 
-  return gameState ? (
+  return (
     <div className="container">
       <div className="line">
         <Square onClick={onClickHandler} player={player} id="1"></Square>
@@ -66,13 +70,26 @@ export default function App() {
         <Square onClick={onClickHandler} player={player} id="8"></Square>
         <Square onClick={onClickHandler} player={player} id="9"></Square>
       </div>
-    </div>
-  ) : (
-    <div className="game-over">
-      <p>{`Game Over!!! player${player} wins!!!`}</p>
-      <button className="game-over-button" onClick={buttonOnClickHandler}>
-        restart game
-      </button>
+
+      {gameState.over ? (
+        gameState.won ? (
+          <div className="game-over">
+            <p>{`Game Over!!! player${player} wins!!!`}</p>
+            <button className="game-over-button" onClick={buttonOnClickHandler}>
+              restart game
+            </button>
+          </div>
+        ) : (
+          <div className="game-over">
+            <p>{`Game Over!!! Its a tie!! Nobody Wins!!`}</p>
+            <button className="game-over-button" onClick={buttonOnClickHandler}>
+              restart game
+            </button>
+          </div>
+        )
+      ) : (
+        ""
+      )}
     </div>
   );
 }
